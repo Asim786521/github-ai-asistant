@@ -1,29 +1,58 @@
-import { mcpClient } from "./mcpClient";
-import { MCPRequest } from "./types";
+import dotenv from "dotenv";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { mcpClient } from "./mcpClient.js";
+import { MCPRequest } from "./types.js";
+import { generateResponse } from "./config/Geminiconfig.js";
+import { compileFunction } from "vm";
+
+dotenv.config();
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function modelWrapper(userMessage: string): Promise<string> {
-  // 🧩 Basic intent detection
-  if (userMessage.toLowerCase().includes("pull requests")) {
-    const request: MCPRequest = {
-      type: "mcp-call",
-      provider: "github",
-      operation: "get_pull_requests",
-      parameters: {
-        repo: "example/repo",
-        state: "merged",
-        merged_after: "2025-10-17T00:00:00Z",
-      },
-    };
-    const data = await mcpClient(request);
-    return `Merged PRs:\n${data.map((d: any) => `- ${d.title}`).join("\n")}`;
-  }
+  try {
+ 
+    const prompt = `
+You are a GitHub assistant.
+Always return a JSON MCP request for GitHub operations.
+Do NOT return any text outside JSON.
+User: ${userMessage}
+`;
 
-  // Discovery example
-  if (userMessage.toLowerCase().includes("discover")) {
-    const request: MCPRequest = { type: "mcp-discover" };
-    const info = await mcpClient(request);
-    return `MCP Server Capabilities:\nTools: ${info.tools.join(", ")}\nResources: ${info.resources.join(", ")}\nPrompts: ${info.prompts.join(", ")}`;
-  }
+    const result = await  generateResponse(prompt)
+console.log("Gemini raw response:", result);
+ 
+    // Strip code fences, markdown, or other wrappers
+ 
+    let maybeMCP=result;
+   
+    console.log("Parsed MCP request:", maybeMCP);
 
-  return "Try asking: 'Summarize all merged GitHub pull requests this week.'";
+    // Generic handler: map any known MCP shapes
+    const isClassic = maybeMCP.type?.startsWith("mcp-");
+    const isEntityFilters = maybeMCP.entity && maybeMCP.filters;
+    const isMethodPath = maybeMCP.method && maybeMCP.url;
+    const isAPIName = maybeMCP.api_name;
+
+    if (isClassic || isEntityFilters || isMethodPath || isAPIName) {
+      // Standardize to MCPRequest
+      const standardizedRequest: MCPRequest = {
+        ...maybeMCP,
+        type: maybeMCP.type || "mcp-call",
+        provider: "github",
+        parameters: maybeMCP.parameters || {},
+        operation: maybeMCP.operation || maybeMCP.method || maybeMCP.api_name,
+      };
+
+      console.log("Standardized MCP request:", standardizedRequest);
+      const data = await mcpClient(standardizedRequest);
+      return `Here’s what I found:\n${JSON.stringify(data, null, 2)}`;
+    }
+
+    return result; // fallback to model text if unrecognized
+
+  } catch (err: any) {
+    console.error("Gemini API error:", err);
+    return `⚠️ Gemini API error: ${err.message}`;
+  }
 }

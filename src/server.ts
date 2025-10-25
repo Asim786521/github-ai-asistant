@@ -1,15 +1,17 @@
-import express, { Request, Response } from "express";
-import bodyParser from "body-parser";
-import { modelWrapper } from "./modelWrapper";
+import express from "express";
+import dotenv from "dotenv";
+import { modelWrapper } from "./modelWrapper.js";
+
+dotenv.config();
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 
-app.post("/api/message", async (req: Request, res: Response) => {
+app.post("/api/message", async (req, res) => {
   const { message } = req.body;
+  console.log("Received message:", message);
   const response = await modelWrapper(message);
   res.json({ text: response });
 });
 
-const PORT = 5000;
-app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
+app.listen(5000, () => console.log("Server running on http://localhost:5000"));

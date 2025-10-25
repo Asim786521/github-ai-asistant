@@ -39,3 +39,6 @@ jest-test-results.json
 # MCP-specific
 *.mcp-cache
 .mcp/
+
+.package-lock.json
+.yarn/cache/

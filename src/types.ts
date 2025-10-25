@@ -1,8 +1,13 @@
 export interface MCPRequest {
-  type: "mcp-call" | "mcp-discover";
+  type: string; // e.g., "mcp-call"
   provider?: string;
+  url?:string
+  method?:string
   operation?: string;
+  objectType?:any
   parameters?: Record<string, any>;
+  filters?: Record<string, any>; // <-- add this line
+ 
 }
 
 export interface MCPTool {
