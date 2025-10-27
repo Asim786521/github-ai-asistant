@@ -35,24 +35,26 @@ export const mcpServer: MCPServer = {
     },
   },
 
-  prompts: {
-    summarizePRs: {
-      role: "system",
-      content: "Summarize pull requests clearly and concisely.",
-    },
-    summarizeIssues: {
-      role: "system",
-      content: "Summarize GitHub issues by title, user, and status.",
-    },
-    summarizeCommits: {
-      role: "system",
-      content: "Summarize commit history highlighting messages and authors.",
-    },
-    summarizeBranches: {
-      role: "system",
-      content: "Summarize branches with recent activity and protection status.",
-    },
+prompts: {
+  summarizeData: {
+    role: "system",
+    content: `
+You are a GitHub assistant that summarizes any GitHub data clearly.
+
+You may receive:
+- Pull requests
+- Issues
+- Commits
+- Branches
+
+Always:
+- Summarize the key insights.
+- Highlight important patterns or stats.
+- Use clear, human-friendly language.
+    `,
   },
+},
+
 
   async handleRequest(req: MCPRequest) {
     console.log("📩 [MCP] Incoming request:", req);
@@ -66,7 +68,8 @@ export const mcpServer: MCPServer = {
     }
 
     let op :any= req.operation;
-    let promptKey: keyof typeof this.prompts = "summarizePRs";
+ 
+let promptKey: keyof typeof this.prompts = "summarizeData";
 
     const map = {
       issues: "summarizeIssues",
@@ -95,6 +98,7 @@ export const mcpServer: MCPServer = {
 
     try {
       const data = await tool.handler(params);
+      console.log(`promptKey`, promptKey);
       const message = generateNaturalSummary(promptKey, data);
       return { message, data };
     } catch (err: any) {
