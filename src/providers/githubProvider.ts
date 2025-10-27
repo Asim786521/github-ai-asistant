@@ -12,19 +12,28 @@ export async function githubProvider(params: Record<string, any>) {
     return getMergedPRsThisWeek(owner, repo);
   }
 
-  try {
-    const response = await octokit.rest.pulls.list({ owner, repo, state });
-    return response.data.map(pr => ({
-      title: pr.title,
-      number: pr.number,
-      url: pr.html_url,
-      merged_at: pr.merged_at,
-      user: pr.user?.login,
-    }));
-  } catch (err) {
-    console.error("GitHub API error:", err);
-    return [];
-  }
+try {
+  const response = await octokit.rest.pulls.list({
+    owner,
+    repo,
+    state,
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  });
+
+  return response.data.map(pr => ({
+    title: pr.title,
+    number: pr.number,
+    url: pr.html_url,
+    merged_at: pr.merged_at,
+    user: pr.user?.login,
+  }));
+} catch (err) {
+  console.error("GitHub API error:", err);
+  return [];
+}
+
 }
 
  
