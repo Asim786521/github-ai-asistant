@@ -26,3 +26,9 @@ export interface MCPPreset {
   role: string;
   content: string;
 }
+
+export type MCPOperation =
+  | "get_pull_requests"
+  | "get_issues"
+  | "get_commits"
+  | "get_branches";
