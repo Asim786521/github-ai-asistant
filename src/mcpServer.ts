@@ -27,9 +27,9 @@ export const mcpServer: MCPServer = {
       description: "Current GitHub repo info",
       async getData() {
         return {
-          owner: process.env.GITHUB_OWNER || "Asim786521",
-          repo: process.env.GITHUB_REPO || "github-ai-asistant",
-          branch: process.env.GITHUB_BRANCH || "main",
+          owner: process.env.GITHUB_OWNER  ,
+          repo: process.env.GITHUB_REPO  ,
+          branch: process.env.GITHUB_BRANCH  ,
         };
       },
     },
@@ -58,7 +58,7 @@ Always:
 
   async handleRequest(req: MCPRequest) {
     console.log("📩 [MCP] Incoming request:", req);
-
+console.log("repo env",process.env.GITHUB_REPO);
     if (req.type === "mcp-discover") {
       return {
         tools: Object.keys(this.tools),

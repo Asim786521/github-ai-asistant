@@ -92,7 +92,7 @@ function buildDynamicPrompt(userMessage: string): string {
       description: "Get merged pull requests this week",
       json: {
         operation: "get_pull_requests",
-        parameters: { owner: "Asim786521", repo: "github-ai-asistant" },
+        parameters: { owner: process.env.GITHUB_OWNER, repo: process.env.GITHUB_REPO },
         filters: { merged_at: { operator: "this_week" } },
       },
     },
@@ -100,7 +100,7 @@ function buildDynamicPrompt(userMessage: string): string {
       description: "List open issues with label 'bug'",
       json: {
         operation: "get_issues",
-        parameters: { owner: "Asim786521", repo: "github-ai-asistant" },
+        parameters: { owner: process.env.GITHUB_OWNER, repo: process.env.GITHUB_REPO },
         filters: { state: { operator: "equals", value: "open" }, labels: { operator: "equals", value: "bug" } },
       },
     },
@@ -108,7 +108,7 @@ function buildDynamicPrompt(userMessage: string): string {
       description: "Show commits from the last 7 days",
       json: {
         operation: "get_commits",
-        parameters: { owner: "Asim786521", repo: "github-ai-asistant", branch: "develop" },
+        parameters: { owner: process.env.GITHUB_OWNER, repo: process.env.GITHUB_REPO },
         filters: { committed_at: { operator: "this_week" } },
       },
     },
@@ -116,7 +116,7 @@ function buildDynamicPrompt(userMessage: string): string {
       description: "List all branches",
       json: {
         operation: "get_branches",
-        parameters: { owner: "Asim786521", repo: "github-ai-asistant" },
+        parameters: { owner: process.env.GITHUB_OWNER, repo: process.env.GITHUB_REPO },
       },
     },
   ];
